@@ -1,0 +1,17 @@
+---
+- name: lets revert all done by playbook4
+  hosts: prod_servers
+  become: yes
+
+  vars:
+    file_to_delete: /var/www/html/index.html
+
+  tasks:
+  - name: stop apache service and disable
+    service: name=apache2 state=stopped enabled=no
+
+  - name: delete service apache
+    apt: name=apache2 state=absent
+
+  - name: delete index.html
+    file: path={{ file_to_delete }} state=absent

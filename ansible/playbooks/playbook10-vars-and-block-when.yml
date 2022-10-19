@@ -1,0 +1,31 @@
+---
+- name: test with blocks
+  hosts: all
+  become: yes
+
+  vars:
+   soft_to_install: net-tools
+   command_to_execute: ip a | grep inet
+
+  tasks:
+  - block: #for redhat systems
+     - name: install net-tools
+       yum: name="{{ soft_to_install }}" state=latest
+     - name: write to variable
+       shell: "{{ command_to_execute }}"
+       register: ip_a
+     - name: print ip_a variable
+       debug:
+        var: ip_a.stdout
+    when: ansible_os_family == "RedHat"
+  - block: #for debian systems
+     - name: install net-tools 
+       apt: name="{{ soft_to_install }}" state=latest
+     - name: write to variable
+       shell: "{{ command_to_execute }}"
+       register: ip_a
+     - name: print ip_a variable
+       debug:
+        var: ip_a.stdout
+    when: ansible_os_family == "Debian"
+

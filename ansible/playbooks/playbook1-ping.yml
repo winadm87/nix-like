@@ -1,0 +1,8 @@
+---
+- name: test connection to my servers #name of playbook
+  hosts: all  #what hosts to run at
+  become: yes #run as sudo
+
+  tasks:
+  - name: Ping my servers #name of the task
+    ping: #command to run, oing doesnt need parameters

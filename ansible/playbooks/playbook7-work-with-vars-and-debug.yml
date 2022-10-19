@@ -1,0 +1,45 @@
+---
+- name: for variables test
+  hosts: prod_servers
+  become: yes
+
+  vars:
+    message1: hi
+    message2: goodbye
+    secret: supestronghash
+
+  tasks:
+  - name: print secret variable
+    debug:
+      var: secret
+
+  - name: print once more
+    debug:
+      msg: "show variable {{ secret }}"
+
+  - name: and again
+    debug:
+      msg: "vladelec etogo servera --> {{ owner }}"
+
+  - name: two variables
+    set_fact: full_message="{{ message1 }} {{ message2 }} from {{ owner }}"
+
+  - name: debug again
+    debug:
+     msg: "{{ full_message }}"
+
+  - name: debug for ip
+    debug:
+     var: ansible_distribution
+
+  - name: write to variable from remote host
+    shell: cat /etc/fstab
+    register: fstabchik
+
+  - name: print from variable
+    debug:
+     var: fstabchik
+
+  - name: try again with ipv4
+    debug:
+     var: ansible_ens33.ipv4

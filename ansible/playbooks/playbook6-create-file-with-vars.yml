@@ -1,0 +1,12 @@
+---
+- name: lets try something new
+  hosts: prod_servers
+  become: yes
+
+  vars:
+    path_of_new_file: /home/index.file
+    text_for_new_file: "Hello world maybe"
+
+  tasks:
+  - name: lets create new file with text
+    shell: echo {{ text_for_new_file }} > {{ path_of_new_file }}

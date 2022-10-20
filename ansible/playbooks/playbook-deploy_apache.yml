@@ -1,0 +1,7 @@
+---
+- name: install apache and copy all folder to remote server
+  hosts: "{{ MYHOSTS }}"
+  become: yes
+
+  roles:
+   - { role: deploy_apache, when: ansible_system == 'Linux' }

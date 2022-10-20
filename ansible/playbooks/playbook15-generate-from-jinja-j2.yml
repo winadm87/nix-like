@@ -1,0 +1,18 @@
+---
+- name: generate some log files on remote via template
+  hosts: prod_servers
+  become: yes
+
+  vars:
+   template_name: to_generate.j2
+   template_path: ./templates/
+   remote_path: /home
+
+  tasks:
+  - name: generate to_generate.log file
+    template: src={{ template_path }}/{{ template_name }} dest={{ remote_path}}/ansible.log
+    register: newvar
+
+  - name: variable?
+    debug:
+     var: newvar.changed

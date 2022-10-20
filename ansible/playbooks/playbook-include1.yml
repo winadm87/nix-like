@@ -1,0 +1,14 @@
+---
+- name: test include anothr yamls
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: ping
+    ping:
+
+  - name: create folders
+    include: create_folders.yml
+
+  - name: create files
+    include: create_files.yml owner="SuperMAN"

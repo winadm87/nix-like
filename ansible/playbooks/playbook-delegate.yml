@@ -1,0 +1,44 @@
+---
+- name: test delegate to another host
+  hosts: "{{ MYHOSTS }}"
+  become: yes
+
+  vars:
+   mytext: "HHHHHHHHHHHHHHHHi"
+
+  tasks:
+  - name: unregister server from load balancer
+    shell: echo this server {{ inventory_hostname }}-{{ ansible_nodename }} was deregistered >> /home/ansibleuser/log.txt
+#    delegate_to: 127.0.0.1
+
+  - name: create file1
+    copy:
+      dest: /home/file1.txt
+      content: |
+       string1
+       string2
+       from var {{ mytext }}
+       owner of server is {{ owner }}
+    delegate_to: srv-deb1
+
+  - name: create file2
+    copy:
+      dest: /home/file2.txt
+      content: |
+       string1
+       string2
+       from var {{ mytext }}
+       OS is {{ ansible_os_family }}
+
+  - name: reboot servers
+    shell: sleep 3 && reboot now
+    async: 1
+    poll: 0
+
+  - name: wait till my server will come up
+    wait_for: 
+        host: "{{ inventory_hostname }}"
+        state: started
+        delay: 5 #from what delay to start waiting
+        timeout: 40 #maximum time to wait
+    delegate_to: 127.0.0.1

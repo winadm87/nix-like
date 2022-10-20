@@ -1,0 +1,32 @@
+---
+- name: Loops playbook
+  hosts: srv-deb1
+  become: yes
+
+  tasks:
+  - name: say hello to all by loop
+    debug:
+      msg: "Hello {{ item }}"
+    loop:
+     - "Vasya"
+     - "Petya"
+     - "Masha"
+
+  - name: say hello to all by until
+    shell: echo -n "G" >> myfile.txt && cat myfile.txt #write to file and cat it
+    register: output #anounce variable
+    delay: 2 #delay 2 seconds
+    retries: 5 #maximum 5 retries, 3 - by default
+    until: output.stdout.find("GGGG") == false #do until we have 4 G in stdout
+
+  - name: print output final
+    debug:
+      var: output.stdout
+
+  - name: install many packages
+    apt: name={{ item }} state=latest
+    loop:
+      - "mc"
+      - "wget"
+      - "ncdu"
+      - "tree"

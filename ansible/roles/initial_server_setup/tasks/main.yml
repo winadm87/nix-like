@@ -1,0 +1,57 @@
+---
+# tasks file for initial_server_setup
+- block: # for redhat-like systems
+   - name: create local user ansiblepet
+     user:
+        name: ansiblepet
+        password: '$6$JriCfqU7p.I7ZG89$beIXSnx8SfSDUi29mIXyS51PEu4DUB04CJgVcgcZrdReUKBfbGFHjt1I9hm4b7Fut8C6C.VB1w1p2MXnSKvRe/'
+        groups: # Empty by default, here we give it some groups
+         - wheel
+        state: present
+        shell: /bin/bash       # Defaults to /bin/bash
+        system: no             # Defaults to no
+        createhome: yes        # Defaults to yes
+        home: /home/ansiblepet  # Defaults to /home/<username>
+   - name: update server
+     yum: name=* state=latest
+     notify:
+      - reboot the system 
+   - name: set timezone to Europe/Riga
+     shell: timedatectl set-timezone Europe/Riga
+   - name: install usefull utils
+     yum: name="{{ item }}" state=latest
+     loop: "{{ list_of_software.split('\n') }}"
+     ignore_errors: yes
+     notify:
+      - reboot the system
+      - check server uptime
+      - debug uptimevar 
+  when: ansible_os_family == "RedHat"
+
+- block: #for debian-like systems
+   - name: create local user ansiblepet
+     user:
+        name: ansiblepet
+        password: '$6$JriCfqU7p.I7ZG89$beIXSnx8SfSDUi29mIXyS51PEu4DUB04CJgVcgcZrdReUKBfbGFHjt1I9hm4b7Fut8C6C.VB1w1p2MXnSKvRe/'
+        groups: # Empty by default, here we give it some groups
+         - sudo
+        state: present
+        shell: /bin/bash       # Defaults to /bin/bash
+        system: no             # Defaults to no
+        createhome: yes        # Defaults to yes
+        home: /home/ansiblepet  # Defaults to /home/<username>
+   - name: update server
+     apt: name=* state=latest
+     notify:
+      - reboot the system
+   - name: set timezone to Europe/Riga
+     shell: timedatectl set-timezone Europe/Riga
+   - name: install usefull utils
+     apt: name="{{ item }}" state=latest
+     loop: "{{ list_of_software.split('\n') }}"
+     ignore_errors: yes
+     notify:
+      - reboot the system
+      - check server uptime
+      - debug uptimevar
+  when: ansible_os_family == "Debian"

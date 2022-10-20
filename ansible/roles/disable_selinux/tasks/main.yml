@@ -1,0 +1,13 @@
+---
+# tasks file for disable_selinux
+- block: #only for redhat systems
+  - name: Ensure SELinux is set to disabled mode
+    ansible.builtin.lineinfile:
+      path: "{{ selinux_config_path }}"
+      regexp: '^SELINUX='
+      line: SELINUX=disabled
+    notify:
+     - reboot the system
+     - check server uptime
+     - debug uptimevar 
+  when: ansible_os_family == "RedHat"

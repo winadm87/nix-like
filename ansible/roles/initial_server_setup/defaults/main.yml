@@ -1,0 +1,11 @@
+---
+# defaults file for initial_server_setup
+list_of_software: |
+      mc
+      nano
+      wget
+      ncdu
+      net-utils
+      htop
+      atop
+      tree

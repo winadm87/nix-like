@@ -1,0 +1,8 @@
+---
+- name: run disable_selinux role
+  hosts: all
+  become: yes
+
+  roles:
+   - { role: disable_selinux, when: ansible_system == 'Linux' }
+

@@ -1,0 +1,23 @@
+---
+# tasks file for apache_remove
+- block: # for redhat systems
+  - name: stop service
+    service: name={{ service_centos }} state=stopped
+  - name: delete package
+    yum: name={{ service_centos }} state=absent
+  when: ansible_os_family == "RedHat"
+
+- block: #for debian systems
+  - name: stop service
+    service: name={{ service_debian }} state=stopped
+  - name: delete package
+    apt: name={{ service_debian }} state=absent
+  when: ansible_os_family == "Debian"
+
+- name: find files to delete
+  find: paths={{ source_folder }} patterns=*
+  register: files_to_delete
+
+- name: remove files
+  file: path="{{ item.path }}" state=absent
+  with_items: "{{ files_to_delete.files }}"

@@ -1,0 +1,11 @@
+---
+# handlers file for disable_selinux
+- name: reboot the system
+  reboot:
+    reboot_timeout: 40
+- name: check server uptime
+  shell: uptime
+  register: uptimevar
+- name: debug uptimevar
+  debug:
+   var: uptimevar.stdout

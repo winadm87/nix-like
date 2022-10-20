@@ -1,0 +1,6 @@
+---
+- name: create folder 1
+  file: path=/home/folder1 state=directory
+
+- name: create folder 2
+  file: path=/home/folder2 state=directory

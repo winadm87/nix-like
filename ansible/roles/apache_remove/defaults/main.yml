@@ -1,0 +1,6 @@
+---
+# defaults file for apache_remove
+source_folder: /var/www/html
+service_centos: httpd
+service_debian: apache2
+

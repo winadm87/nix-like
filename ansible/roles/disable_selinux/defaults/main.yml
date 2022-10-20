@@ -1,0 +1,3 @@
+---
+# defaults file for disable_selinux
+selinux_config_path: /etc/selinux/config

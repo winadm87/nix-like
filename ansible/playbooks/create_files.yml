@@ -1,0 +1,16 @@
+---
+- name: create file1
+  copy:
+   dest: /home/folder1/file1
+   content: |
+     text line1, in file1
+     text line2, in file2
+     os version {{ ansible_os_family }}
+     server owner is {{ owner }}
+- name: create file2
+  copy:
+   dest: /home/folder2/file2
+   content: |
+     text line 1, in file2
+     text line2, in file 2
+     server owner is {{ owner }}

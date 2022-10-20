@@ -1,0 +1,17 @@
+---
+- name: try to reboot remote and wait for server up
+  hosts: "{{ MYHOSTS }}"
+  become: yes
+
+  tasks:
+  - name: reboot server and wait for come up
+    reboot:
+     reboot_timeout: 40
+
+  - name: check server uptime
+    shell: uptime
+    register: uptimevar
+
+  - name: debug uptimevar
+    debug:
+     var: uptimevar.stdout

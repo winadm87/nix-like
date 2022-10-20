@@ -1,0 +1,28 @@
+---
+- name: ansible error handling example
+  hosts: prod_servers
+  become: true
+
+  tasks:
+  - name: apt
+    apt: name=treeee state=latest
+    register: aptresult
+    ignore_errors: yes
+    failed_when: "'No package' in aptresult.msg"
+  - debug:
+     var: aptresult
+
+  - name: shell echo
+    shell: echo hello world
+    register: echoresult
+
+  - name: shell echo 2
+    shell: ls -la /home
+    register: lsresult
+    failed_when: "'ansible.log' in lsresult.stdout"
+#    failed_when: lsresult.rd == 0 #rc=result code in linux
+  - debug:
+     var: lsresult
+
+  - name: shell echo 3
+    shell: echo sooooo??

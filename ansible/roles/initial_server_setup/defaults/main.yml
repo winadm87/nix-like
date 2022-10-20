@@ -5,7 +5,9 @@ list_of_software: |
       nano
       wget
       ncdu
-      net-utils
+      net-tools
       htop
       atop
       tree
+      lsof
+dest_file_bashrc: ~/.bashrc

@@ -15,9 +15,22 @@
    - name: update server
      yum: name=* state=latest
      notify:
-      - reboot the system 
-   - name: set timezone to Europe/Riga
-     shell: timedatectl set-timezone Europe/Riga
+      - reboot the system
+   - name: install epel-release
+     yum: name=epel-release state=latest
+     ignore_errors: yes
+   - name: add lines to file
+     lineinfile:
+      path: "{{ dest_file_bashrc }}"
+      state: present
+      line: "{{ item }}"
+     with_items:
+      - 'export HISTSIZE=10000'
+      - 'export HISTTIMEFORMAT="%h %d %H:%M:%S "'
+      - 'PROMPT_COMMAND="history -a"'
+      - 'export HISTIGNORE="ls:ll:history:w:htop"'
+   - name: highlite syntax
+     shell: cp /usr/share/mc/syntax/sh.syntax /usr/share/mc/syntax/unknown.syntax
    - name: install usefull utils
      yum: name="{{ item }}" state=latest
      loop: "{{ list_of_software.split('\n') }}"
@@ -25,7 +38,7 @@
      notify:
       - reboot the system
       - check server uptime
-      - debug uptimevar 
+      - debug uptimevar
   when: ansible_os_family == "RedHat"
 
 - block: #for debian-like systems
@@ -44,8 +57,6 @@
      apt: name=* state=latest
      notify:
       - reboot the system
-   - name: set timezone to Europe/Riga
-     shell: timedatectl set-timezone Europe/Riga
    - name: install usefull utils
      apt: name="{{ item }}" state=latest
      loop: "{{ list_of_software.split('\n') }}"
@@ -55,3 +66,6 @@
       - check server uptime
       - debug uptimevar
   when: ansible_os_family == "Debian"
+
+- name: set timezone to Europe/Riga
+  shell: timedatectl set-timezone Europe/Riga

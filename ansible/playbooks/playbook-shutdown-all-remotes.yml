@@ -1,0 +1,9 @@
+---
+- name: shutdown remote servers
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: shut mf down
+    community.general.shutdown:
+     delay: 3

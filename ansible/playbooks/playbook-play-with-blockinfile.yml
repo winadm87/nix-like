@@ -1,0 +1,15 @@
+---
+- name: lets play with blockinfile
+  hosts: srv-test2
+  become: yes
+
+  tasks:
+  - name: create file to insert data
+    shell: touch /home/filetotest && echo string123 >> /home/filetotest
+  - name: blockinfile
+    blockinfile: |
+     dest=/home/filetotest backup=yes
+     content="string2
+        string3
+        string4"
+

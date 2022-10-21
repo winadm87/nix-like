@@ -7,7 +7,7 @@
 #===============================
 # ansible - push
 # create a user on master and nodes
-# sudo useradd ansibleuser
+# sudo useradd -m ansibleuser
 # on master - su - ansibleuser
 # on master - ssh-keygen
 # on master - ssh-copy-id ansibleuser@nodeip

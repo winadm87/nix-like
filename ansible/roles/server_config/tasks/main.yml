@@ -1,0 +1,97 @@
+---
+# tasks file for server_config
+- name: check and print linux version
+  debug: var=ansible_os_family
+
+- name: firewall - add allowed ports to internal zone
+  firewalld:
+    zone: internal
+    port: "{{ item.port }}"
+    permanent: true
+    state: "{{ item.state }}"
+  loop: "{{ port_list }}"
+  notify:
+    - restart_firewalld
+- name: firewall - add sources to internal zone
+  firewalld:
+    zone: internal
+    source: "{{ item.source }}"
+    permanent: true
+    state: "{{ item.state }}"
+  loop: "{{ source_list }}"
+  notify:
+    - restart_firewalld
+- name: firewall - remove services from public zone
+  firewalld:
+    zone: public
+    service: "{{ item.svc }}"
+    permanent: true
+    state: "{{ item.state }}"
+  loop: "{{ public_zone_svc }}"
+  notify:
+    - restart_firewalld
+- name: Make some sysctl basic tuning
+  lineinfile:
+    path: "{{ sysctl_dest_file }}"
+    state: present
+    line: "{{ item }}"
+  loop: "{{ sysctl_tuning }}"
+  notify:
+    - reload_sysctl
+- name: install nginx:latest
+  yum: name=nginx state=latest
+- name: enable and start nginx
+  service: name=nginx state=started enabled=yes
+- name: get nginx worker proccess max value hat server can handle and set it as variable
+  shell: "grep ^processor /proc/cpuinfo | wc -l"
+  register: nginx_worker_process
+- name: replace nginx_worker_process in nginx.conf
+  lineinfile:
+    path: "{{ nginx_conf_path }}"
+    regexp: '^(.*)worker_processes(.*)$'
+    line: 'worker_processes {{ nginx_worker_process.stdout }};'
+    backrefs: yes
+- name: get nginx worker connections max value that server can handle and set it as variable
+  shell: "ulimit -n"
+  register: nginx_worker_connections
+- name: replace nginx_worker_connections in nginx.conf
+  lineinfile:
+    path: "{{ nginx_conf_path }}"
+    regexp: '^(.*)worker_connections(.*)$'
+    line: '     worker_connections {{ nginx_worker_connections.stdout }};'
+    backrefs: yes
+- name: check keepalive_requests parameter in nginx.conf
+  shell: grep -c "^keepalive_requests" {{ nginx_conf_path }} || true
+  register: test_keepalive_requests_grep
+- name: set keepalive_requests parameter in nginx.conf, for testing high load
+  lineinfile:
+    path: "{{ nginx_conf_path }}"
+    insertafter: '^http {'
+    line: '    keepalive_requests  1000;'
+  when: test_keepalive_requests_grep.stdout == "0"
+- name: install opensll and stunnel for rsyslog server
+  yum: name="{{ item.name }}" state="{{ item.state }}"
+  loop: "{{ list_of_software }}"
+  ignore_errors: yes
+- name: copy stunnel service config to /usr/lib/systemd/system/stunnel.service
+  copy: src=stunnel.service dest=/usr/lib/systemd/system/stunnel.service
+- name: copy stunnel conf to /etc/stunnel/stunnel.conf
+  copy: src=stunnel.conf dest=/etc/stunnel/stunnel.conf
+- name: add lines to server rsyslog.conf
+  lineinfile:
+    path: /etc/rsyslog.conf
+    insertafter: '^$WorkDirectory /var/lib/rsyslog'
+    line: '{{ item }}'
+  with_items:
+    - '###begin forwarding rule to stunnel port for passing on to VPS (see /etc/stunnel/stunnel.conf)###'
+    - '$ActionQueueType LinkedList'
+    - '$ActionQueueFileName logs-spooled-{{ ansible_fqdn }}'
+    - '$ActionResumeRetryCount -1'
+    - '$ActionQueueSaveOnShutdown on'
+    - '*.* @@127.0.0.1:10514'
+    - '# ###end of the forwarding rule###'
+  notify:
+    - restart_rsyslog
+- name: enable and start stunnel service
+  service: name=stunnel state=started enabled=yes
+

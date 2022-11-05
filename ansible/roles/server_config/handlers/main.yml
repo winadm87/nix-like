@@ -1,0 +1,17 @@
+---
+# handlers file for server_config
+- name: restart_firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+- name: reload_sysctl
+  command: "sysctl -p"
+- name: restart_nginx
+  service:
+    name: nginx
+    state: restarted
+- name: restart_rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+

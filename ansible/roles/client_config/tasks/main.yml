@@ -1,0 +1,89 @@
+---
+# tasks file for client_config
+- name: check and print linux version
+  debug: var=ansible_os_family
+
+- name: firewall - add allowed ports to internal zone
+  firewalld:
+    zone: internal
+    port: "{{ item.port }}"
+    permanent: true
+    state: "{{ item.state }}"
+  loop: "{{ port_list }}"
+  notify:
+    - restart_firewalld
+- name: firewall - add sources to internal zone
+  firewalld:
+    zone: internal
+    source: "{{ item.source }}"
+    permanent: true
+    state: "{{ item.state }}"
+  loop: "{{ source_list }}"
+  notify:
+    - restart_firewalld
+- name: firewall - remove services from public zone
+  firewalld:
+    zone: public
+    service: "{{ item.svc }}"
+    permanent: true
+    state: "{{ item.state }}"
+  loop: "{{ public_zone_svc }}"
+  notify:
+    - restart_firewalld
+- name: Make some sysctl basic tuning
+  lineinfile:
+    path: "{{ sysctl_dest_file }}"
+    state: present
+    line: "{{ item }}"
+  loop: "{{ sysctl_tuning }}"
+  notify:
+    - reload_sysctl
+- name: install opensll and stunnel for rsyslog server
+  yum: name="{{ item.name }}" state="{{ item.state }}"
+  loop: "{{ list_of_software }}"
+  ignore_errors: yes
+- name: copy stunnel service config to /usr/lib/systemd/system/stunnel.service
+  copy: src=stunnel.service dest=/usr/lib/systemd/system/stunnel.service
+- name: copy stunnel conf to /etc/stunnel/stunnel.conf
+  copy: src=stunnel.conf dest=/etc/stunnel/stunnel.conf
+#- name: upgrade pip3
+#  command: 'pip3 install --upgrade pip'
+#- name: pip3 install cryptography
+#  command: 'pip3 install cryptography'
+#- name: pip3 install pyOpenSSL
+#  command: 'pip3 install pyOpenSSL'
+#- name: Generate an OpenSSL private key
+#  openssl_privatekey:
+#    path: "/etc/stunnel/{{ ansible_fqdn }}_privkey.pem"
+#    size: "4096"
+#    type: "RSA"
+#    backup: yes
+#- name: Generate an OpenSSL Certificate Signing Request with Subject information
+#  openssl_csr:
+#    path: "/etc/stunnel/{{ ansible_fqdn }}.csr"
+#    privatekey_path: "/etc/stunnel/{{ ansible_fqdn }}_privkey.pem"
+#    country_name: "US"
+#    organization_name: "MLBC"
+#    email_address: "win.adm87@gmail.com"
+#    common_name: "{{ ansible_fqdn }}"
+#- name: Generate a Self Signed OpenSSL certificate
+#  openssl_certificate:
+#    path: "/etc/stunnel/{{ ansible_fqdn }}_cert.pem"
+#    privatekey_path: "/etc/stunnel/{{ ansible_fqdn }}_privkey.pem"
+#    csr_path: "/etc/stunnel/{{ ansible_fqdn }}.csr"
+#    provider: selfsigned
+- name: replace string in /etc/rsyslog.conf
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^(.*)ModLoad imtcp(.*)$'
+    line: '$ModLoad imtcp'
+    backrefs: yes
+- name: replace second string in /etc/rsyslog.conf
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^(.*)InputTCPServerRun(.*)$'
+    line: '$InputTCPServerRun 10514'
+    backrefs: yes
+- name: lets enable and start stunnel service
+  service: name=stunnel state=started enabled=yes
+

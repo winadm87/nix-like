@@ -7,7 +7,7 @@ port_list:
 source_list:
   - { source: 172.16.16.16, state: enabled }  # client server
   - { source: 172.16.16.16, state: enabled } # ivanov
-  - { source: 172.16.16.16, state: enabled }   # mlbc mgmnt 
+  - { source: 172.16.16.16, state: enabled }   #
 public_zone_svc:
   - { svc: ssh, state: disabled }
   - { svc: dhcpv6-client, state: disabled }

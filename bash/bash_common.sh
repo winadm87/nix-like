@@ -51,6 +51,9 @@ sort < cat file
 # work with permissions block
 # u -user, g -group, +rw - add permission to read\write
 chmod ug+rw test.txt
+# suid - run by owner id, u+d
+# sgid - run by groupid, g+s
+# stickybit - only owner or root can delete file, o+t
 ##############################
 
 ##############################
@@ -62,7 +65,7 @@ ps -eo pid,ppid,ni,comm
 # kill process
 sudo kill pid
 # kill signal -HUP
-sudo kill - HUP pid
+sudo kill -HUP pid
 #get files opened by a process 
 lsof -c cupsd 
 lsof -p pid
@@ -137,6 +140,30 @@ sudo mount /dev/cdrom dest/
 # network block
 # list listening ports
 ss -tlpn
+# netcat to check port availability and run some commands after connect
+nc -v oilterminal.ru 443
+# netcat only to check port avaialability
+nc -zv oilterminal.ru 443
+# scan multiple ports availability
+nc -v -w 2 z 192.168.56.1 22 80
+nc -zv 10.0.2.4 1230-1235
+# create a listener on port 1234
+nc -lv 1234
+# host - get dns records
+host -a oilterminal.ru
+# get exact dns record type
+host -t MX google.com.sg
+# dig into dns records
+dig oilterminal.ru
+# http GET request
+curl https://oilterminal.ru
+# http return only HEADers
+curl -I http://oilterminal.ru
+# verbose HTTP connection
+curl -vI https://oilterminal.ru
+# get mac table
+arp -a
+# network block finish
 ################################
 
 ################################
@@ -159,3 +186,66 @@ find . -name "net_stats" -type f -print0 | xargs -0 /bin/rm -v -rf "{}"
 
 #get file data to a terminal realtime, follow=name allows do not terminate tail if it SIGHUP'ed
 tail --follow=name $logfilename
+
+################################
+# tcpdump block
+# lets start with 443 port monitor
+sudo tcpdump -nnSX port 443
+# now lets listen only on one interface
+sudo tcpdump -i ens33
+# now lets look only for communication with one ip
+sudo tcpdump host 192.168.126.2
+# lets write to file, pcap can be investigated by wireshark
+sudo tcpdump -nnSX port 80 -w /home/admin7/Desktop/capture.pcap
+# looking only for some ports
+tcpdump port 3389
+tcpdump src port 1025
+# and lets combine
+tcpdump -nnvvS src 10.5.2.3 and dst port 3389
+tcpdump -nvX src net 192.168.0.0/16 and dst net 10.0.0.0/8 or 172.16.0.0/16
+tcpdump dst 192.168.0.2 and src net and not icmp
+tcpdump -vv src mars and not dst port 22
+# use quotes to ignore brackets
+tcpdump 'src 10.0.2.4 and (dst port 3389 or 22)'
+# find http agent user agents
+tcpdump -vvAls0 | grep 'User-Agent:'
+# cleartext get requests
+tcpdump -vvAls0 | grep 'GET'
+# find http host address
+tcpdump -vvAls0 | grep 'Host:'
+# lets get some cookies
+tcpdump -vvAls0 | grep 'Set-Cookie|Host:|Cookie:'
+# !!! lets get ssh connections regardless of port being used
+tcpdump 'tcp[(tcp[12]>>2):4] = 0x5353482D'
+# find dns traffic
+tcpdump -vvAs0 port 53
+# find cleartext passwords
+tcpdump port http or port ftp or port smtp or port imap or port pop3 or port telnet -lA | egrep -i -B5 'pass=|pwd=|log=|login=|user=|username=|pw=|passw=|passwd= |password=|pass:|user:|username:|password:|login:|pass |user '
+# tcpdump block finish
+################################
+
+################################
+# journal block
+# get logs
+journalctl -xe
+# get current boot kernel logs
+journalctl -k
+# get logs from some unit
+journalctl -u open-vm-tools.service
+# journal block finish
+################################
+
+################################
+# work with firewall block
+sudo firewall-cmd --zone=public --permanent --add-service=http
+sudo firewall-cmd --zone=public --permanent --list-services
+sudo firewall-cmd --zone=public --add-port=5000/tcp
+sudo firewall-cmd --zone=public --list-ports
+sudo firewall-cmd --reload
+sudo ufw allow ssh
+sudo ufw allow 9090/tcp
+sudo ufw reload
+# work with firewall block finish
+################################
+
+

@@ -1,0 +1,9 @@
+---
+# handlers file for client_config
+- name: restart_firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+- name: reload_sysctl
+  command: "sysctl -p"
+

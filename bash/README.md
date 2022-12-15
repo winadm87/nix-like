@@ -1,3 +1,3 @@
 # Bash scripts
 - testtask.sh - basic usage of filedescriptor and SIGHUP
-- bash_common.sh - set of basic shell commands
+- 000-* - set of basic shell commads divided by usage
